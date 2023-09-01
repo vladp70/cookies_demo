@@ -31,47 +31,11 @@ public class CarController {
     @PutMapping("/dark-mode")
     ResponseEntity<String> setDarkModeStatus(
             @RequestBody DarkModeDTO darkModeDTO) {
-
-        return null;
-    }
-
-    @GetMapping("/coupon/{id}")
-    public ResponseEntity<String> getCouponById(
-            @PathVariable Integer id,
-            @CookieValue(name = "code", defaultValue = "") String cookieCode
-    ){
-        Date current = new Date();
-        Optional<Car> obj = carService.getCarById(id);
-
-       if(obj.isEmpty() || obj.get().getExpiryDate().compareTo(current) < 0) {
-           String errorMessage = "Not found!";
-           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage).;
-       }
-
-       // cuponul a fost gasit si nu este expirat
-        // e prima data cand utilizatorul cere cuponul (nu are un cookie cu el)
-        // sau are un cookie care este diferit de codeul cuponului
-        if (cookieCode.compareTo("") == 0 || obj.get().getCode().compareTo(cookieCode) != 0) {
-            // TODO: cresc numarul de utilizari ale cuponului
-            Car car = obj.get();
-            if (car.getNumUsesLeft() - 1 < 0) {
-                String errorMessage = "No usages left!";
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-            }
-            car.setNumUses(car.getNumUses() + 1);
-            car.setNumUsesLeft(car.getNumUsesLeft() - 1);
-            carService.saveCar(car);
-        } else {
-            // Nu cresc numarul de utilizari
-        }
-
-        ResponseCookie springCookie = ResponseCookie.from("code", obj.get().getCode())
+        ResponseCookie springCookie = ResponseCookie.from("darkMode", Boolean.toString(darkModeDTO.getDarkMode()))
                 .path("/")
                 .build();
         return ResponseEntity .ok()
                 .header(HttpHeaders.SET_COOKIE, springCookie.toString()) .build();
     }
-
-
 
 }
